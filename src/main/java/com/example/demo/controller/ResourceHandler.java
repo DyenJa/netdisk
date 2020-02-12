@@ -155,6 +155,7 @@ public class ResourceHandler {
 		}
 		r.setUserid(uid);
 		rs.addReource(r);
+		System.out.println("ok");
 		//创建文件夹（即只需要插入一条记录，并不需要本地创建）
 		//文件类型设置为folder
 		return "forward:/loadSourceList?current_position="+parentid;

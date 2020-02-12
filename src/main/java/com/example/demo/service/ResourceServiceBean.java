@@ -34,9 +34,11 @@ public class ResourceServiceBean {
 				um.changeSpace(map);
 				
 			}
-			rm.addReource(rs);
+			System.out.println(rm.addReource(rs));
+
 		}
 		catch (Exception e){
+			e.printStackTrace();
 			return false;
 		}
 		return true;	

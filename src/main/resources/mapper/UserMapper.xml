@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.UserMapper">
+	
+	 <select id="findUserByName" parameterType="String"  resultType="com.example.demo.entity.User">
+		select * from users where uName=#{uName}
+	</select>
+		
+	<insert id="createNewUser" parameterType="com.example.demo.entity.User" >
+		insert into users(uName,password,email,picurl,avaliable_space)
+		values(#{uName},#{password},#{email},#{picurl},#{avaliable_space})
+	</insert>
+		
+	 <select id="findUserByID" parameterType="int"  resultType="com.example.demo.entity.User">
+		select * from users where uID=#{id}
+	</select>
+	
+	<select id="getUserBySrcID" parameterType="String"  resultType="com.example.demo.entity.User">
+		select u.* 
+		from users u,src s
+		where s.srcID=#{srcID} and s.userid=u.uid
+	</select>
+	
+	<update id="changeSpace" parameterType="map" >
+		update users set avaliable_space=avaliable_space+#{change} where uid=#{uid}
+	</update>
+	
+	<update id="changeheadpic" parameterType="map" >
+		update users set picurl=#{url} where uid=#{uid}
+	</update>
+	
+	<update id="changepwd" parameterType="map" >
+		update users set password=#{password} where uid=#{uid}
+	</update>
+	<update id="addPoints" parameterType="int" >
+		update users set points=points+1 where uid=#{uid}
+	</update>
+</mapper>
+

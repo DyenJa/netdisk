@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.ResourceMapper">
+	
+	
+		
+	<insert id="addReource" parameterType="com.example.demo.entity.Resource" >
+		insert into src(srcID,name,type,size,edit_time,srcurl,parentid,userid)
+		values(#{srcID},#{name},#{type},#{size},#{edit_time},#{srcurl},#{parentid},#{userid})
+	</insert>
+	
+	
+ <select id="getResourceList" parameterType="map"  resultType="com.example.demo.entity.Resource">
+		select * from src where userid=#{userid} and parentid=#{parentid} and state=1
+	</select>
+	
+	 <select id="getDeletedResourceIDList" parameterType="String"  resultType="String">
+		select srcID from src where parentid=#{parentid} and state=4
+	</select>
+	
+	<select id="getResourceBySrcID" parameterType="String"  resultType="com.example.demo.entity.Resource">
+			select * from src where srcID=#{srcID}
+		</select>
+		
+		
+		 <select id="loadByType" parameterType="map"  resultType="com.example.demo.entity.Resource">
+			
+			select * from src where state=1 and userid=#{userid} and type in 
+			<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+       			#{item}
+  			 </foreach>
+		</select>
+	
+		<update id="deleteResourceBySrcID" parameterType="String" >
+			update src set state=2 ,edit_time=sysdate() where srcID=#{srcID}
+		</update>
+		
+		<update id="deleteSonResource" parameterType="String" >
+			update src set state=2 ,edit_time=sysdate() where parentid=#{parentid} and (type='folder' or type='folders' )
+		</update>
+		
+		<update id="batchDelete" parameterType="java.util.List" >
+			update src set state=4 ,edit_time=sysdate() where srcID in
+             <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+		      #{item.srcID}
+		     </foreach> 
+		</update>
+		
+		 <select id="getTrashList" parameterType="int"  resultType="com.example.demo.entity.Resource">
+			select * from src where userid=#{userid} and state=2
+		</select>
+		
+	
+		
+		<update id="rename" parameterType="map" >
+			update src set name=#{newName}  where srcID=#{srcID}
+		</update>
+		
+		<insert id="share" parameterType="java.util.List" >
+			insert into notice (nid, giver, receiver,classification,srcID,srcSize,srcName,time) values
+	         <foreach collection="list" item="item" index="index" separator=",">
+	             (#{item.nid},
+	              #{item.giver},
+	              #{item.receiver},
+	              #{item.classification},
+	              #{item.srcID},
+	              #{item.srcSize},
+	               #{item.srcName},
+	              #{item.time})
+	         </foreach>
+		</insert>
+		
+		<update id="undo" parameterType="java.util.List" >
+            update src set state=1 , edit_time=sysdate() where srcID in
+              <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+		      #{item}
+		     </foreach>  
+		</update>
+		
+		<update id="realDelete" parameterType="java.util.List" >
+			  update src set state=3 , edit_time=sysdate() where srcID in
+             <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+		      #{item}
+		     </foreach> 
+		</update>
+		
+		
+		
+		<update id="realDeleteSonResource" parameterType="String" >
+			  update src set state=3 , edit_time=sysdate() where parentid=#{parentid}
+		</update>
+		
+		 <select id="totalNotice" parameterType="String"  resultType="int">
+			select count(*) from notice where giver=#{username} or receiver=#{username}
+		</select>
+				
+		<select id="loadNotice" parameterType="map"  resultType="com.example.demo.entity.Notice">
+			select  * from notice where giver=#{username} or receiver=#{username}
+			order by time desc
+			limit #{from},#{count}
+		</select>
+		
+		<select id="totalNoticeByType" parameterType="map"  resultType="int">
+			select count(*) from notice where 
+			 <if test="type==1">  
+		        giver=#{username} and classification=1
+		     </if>  
+		     <if test="type==2">  
+		        receiver=#{username} and classification=1 
+		     </if>  
+		 	 <if test="type==3">  
+		         receiver=#{username} and classification>1 
+		     </if>
+		</select>
+		
+		<select id="loadNoticeByType" parameterType="map"  resultType="com.example.demo.entity.Notice">
+			select  * from notice where 			
+			<if test="type==1">  
+		        giver=#{username} and classification=1 
+		        order by time desc
+		     	 limit #{from},#{count}
+		     </if>  
+		     <if test="type==2">  
+		        receiver=#{username} and classification=1 
+		         order by time desc
+		     	 limit #{from},#{count}
+		     </if>  
+		 	 <if test="type==3">  
+		         receiver=#{username} and classification>1 
+		          order by time desc
+		     	 limit #{from},#{count} 
+		     </if>
+		</select>
+		
+		
+		<update id="switchToFolders" parameterType="String" >
+			update src set type='folders' where  srcID=#{srcID}
+		</update>
+		
+		
+		<update id="switchToFolder" parameterType="String" >
+			update src set type='folder' where  srcID=#{srcID}
+		</update>
+		
+		
+		<select id="getDirectory" parameterType="map"  resultType="com.example.demo.entity.Resource">
+			select * from src where parentid=#{parentid} and (type='folder' or type='folders' ) and state=1
+		</select>
+		
+		<select id="getRootDirectory" parameterType="map"  resultType="com.example.demo.entity.Resource">
+			select * from src where userid=#{uid} and (type='folder' or type='folders' ) and parentid='none' and state=1
+		</select>
+		
+		<select id="getForcedDirectory" parameterType="String"  resultType="String">
+			select srcID from src where parentid=#{parentid} and (type='folder' or type='folders' )
+		</select>
+		
+		<update id="changeFolder" parameterType="map" >
+			update src set parentid=#{target_folder} where  srcID=#{moved_src}
+		</update>
+		
+		<insert id="addNotice" parameterType="com.example.demo.entity.Notice" >
+		insert into notice(nid,giver,receiver,classification,srcID,srcSize,srcName,time)
+		values(#{nid},#{giver},#{receiver},#{classification},#{srcID},#{srcSize},#{srcName},#{time})
+	</insert>
+	
+	
+		<update id="setAllUnread" parameterType="String" >
+			update notice set unread=0 where receiver=#{uname}
+		</update>
+		
+		
+		<select id="loadThreeNotice" parameterType="String"  resultType="com.example.demo.entity.Notice">
+			select * from notice 
+			where receiver=#{username}  and unread=1
+			order by time desc
+			limit 0,3
+		</select>
+	<select id="getUnreadNotice" parameterType="String"  resultType="int">
+		select count(*) from notice
+		 where receiver=#{receiver} and unread=1
+	</select>
+	
+	
+	<delete id="deleteNotice" parameterType="String" >
+		delete from notice where nid=#{nid}
+	</delete>
+</mapper>
+

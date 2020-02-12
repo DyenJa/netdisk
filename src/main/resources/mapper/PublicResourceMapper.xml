@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.PublicResourceMapper">
+		
+	<insert id="addPublicResource" parameterType="String" >
+		insert into public_rsrc(srcID)
+		values(#{srcID})
+	</insert>
+	
+	 <select id="searchPublicResource" parameterType="map"  resultType="com.example.demo.entity.PublicResourceVo">
+		select p.srcID,p.good,p.bad, p.downloads,s.name,s.type,s.size,s.edit_time,s.userid,u.uname,(p.good/p.bad) as good_rate
+		from public_rsrc p left join src s on p.srcID=s.srcID 
+        left join users u on u.uID=s.userid
+		where s.name like  CONCAT('%',#{name},'%') and s.type in 
+			<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+       			#{item}
+  			</foreach>
+		order by good_rate desc
+		limit #{from},#{count}
+	</select>
+	
+	<select id="countSearchResult" parameterType="map"  resultType="int">
+		select count(*) from public_rsrc p left join src s 
+		on p.srcID=s.srcID
+		where s.name like  CONCAT('%',#{name},'%') and s.type in
+			<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+       			#{item}
+  			</foreach>
+	</select>
+	
+	<select id="getPublicResourceByID" parameterType="String"  resultType="com.example.demo.entity.PublicResourceVo">
+		select  p.srcID,
+				p.good,
+				p.bad, 
+				p.downloads,
+				s.name,
+				s.type,
+				s.size,
+				s.edit_time,
+				s.userid,
+				u.uname
+		from public_rsrc p left join src s  on p.srcID=s.srcID 
+		left join users u on u.uID=s.userid
+		where p.srcID=#{srcID}
+	</select>
+	
+	<select id="getCommentBysrcID" parameterType="map"  resultType="com.example.demo.entity.Comment">
+		select * from comment where srcID=#{srcID}
+		order by time desc limit #{from},#{count}
+	</select>
+	
+	<select id="countCommentsBysrcID" parameterType="String"  resultType="int">
+		select count(*) from comment where srcID=#{srcID}
+	</select>
+	
+	<insert id="insertAttitude" parameterType="map" >
+		insert into attitude(srcID,uID)
+		values (#{srcID},#{uid})
+	</insert>
+	
+	<update id="evaluate" parameterType="map" >
+			update attitude set attitude=#{attitude} where srcID=#{srcID} and uID=#{uid}
+	</update>
+	
+	<select id="getEvaluation" parameterType="map"  resultType="int">
+		select attitude from attitude where srcID=#{srcID} and uid=#{uid}
+	</select>
+	
+	<insert id="comment" parameterType="com.example.demo.entity.Comment" >
+		insert into comment(srcID,time,commenter_id,commenter_name,commenter_pic,content)
+		values (#{srcID},#{time},#{commenter_id},#{commenter_name},#{commenter_pic},#{content})
+	</insert>
+	
+	
+	
+		<update id="publicDownload" parameterType="String" >
+			update public_rsrc set downloads=downloads+1 where srcID=#{srcID} 
+		</update>	
+		
+		<update id="addAttitude" parameterType="map" >
+			update public_rsrc set 
+			 <if test="attitude==1">  
+		        good=good+1
+		     </if>  
+		      <if test="attitude==0">  
+		        bad=bad+1
+		     </if> 
+			where srcID=#{srcID}
+		</update>
+		
+
+</mapper>
+

@@ -25,5 +25,10 @@
 ## 在学院虚拟机部署（网址，截图）
 - 网址（请在学校内网环境中访问）：<http://172.19.240.243:8080/login?tdsourcetag=s_pctim_aiomsg>
 - 截图：
+**网站访问页面**
 ![网站部署截图1](resource/img/netdisk1.png)
 ![网站部署截图2](resource/img/netdisk2.png)
+**后台服务器部署情况**
+![网站部署截图3](resource/img/netdisk3.png)
+**后台服务器监听8080端口**
+![网站部署截图4](resource/img/netdisk4.png)

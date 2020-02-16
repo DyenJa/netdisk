@@ -14,3 +14,7 @@
 ![Jenkins截图3](resource/jenkins-img/img3.png)
 ![Jenkins截图4](resource/jenkins-img/img4.png)
 ![Jenkins截图5](resource/jenkins-img/img5.png)
+
+## 使用SonarQube进行代码质量检测（报告）
+![SonarQube截图1](resource/sonarqube-img/sonarqube1.png)
+![SonarQube截图1](resource/sonarqube-img/sonarqube1.png)

@@ -141,11 +141,26 @@ public class PublicResourceServiceBean  {
 	 
 	public boolean comment(int uid,String text,String srcID) throws Exception {
 		// TODO Auto-generated method stub
-
-		return true;
+		User u=um.findUserByID(uid);
+		Comment c=new Comment();
+		c.setCommenter_id(uid);
+		c.setCommenter_name(u.getuName());
+		c.setCommenter_pic(u.getPicurl());
+		c.setContent(text);
+		c.setSrcID(srcID);
+		c.setTime(new Date());
+		return pm.comment(c);
 	}
 
 
+	public List<Comment> getCommentsBysrcID(String srcID, int page) throws Exception {
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("srcID", srcID);
+		map.put("from", (page-1)*4);
+		map.put("count", 4);
+
+		return pm.getCommentBysrcID(map);
+	}
 
 	 
 	public int countComments(String srcID) throws Exception {
@@ -157,25 +172,110 @@ public class PublicResourceServiceBean  {
 	public boolean evaluate(String srcID, int uid, String attitude) throws Exception {
 		// TODO Auto-generated method stub
 
+
+
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("srcID", srcID);
+		map.put("uid",uid);
+		int attitu;
+		if("good".equals(attitude))
+			attitu=1;
+		else
+			attitu=0;
+		try {
+
+			map.put("attitude",attitu);
+			pm.evaluate(map);
+			pm.addAttitude(map);
+		}
+		catch (Exception e) {
+			return false;
+		}
 		return true;
 	}
 
 	 
 	public int getEvaluation(String srcID, int uid) throws Exception {
-
-		return 0;
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("srcID", srcID);
+		map.put("uid",uid);
+		int a;
+		try {
+			a=pm.getEvaluation(map);
+		}
+		catch(Exception e) {
+			return -2;
+		}
+		return a;
 	}
 	
 	 
 	public boolean publicDownload(String srcID,int sharer,int downloader) throws Exception {
+		try {
 
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("srcID", srcID);
+			map.put("uid",downloader);
+			pm.insertAttitude(map);				//插入新的attitude
+		}
+		catch(Exception e) {
+
+			return false;
+		}
+
+
+		try {
+
+			pm.publicDownload(srcID);	//增加下载次数
+
+		}
+		catch(Exception e) {
+
+			return false;
+		}
+
+
+		try {
+			um.addPoints(sharer);				//增加积分
+
+		}
+		catch(Exception e) {
+
+			return false;
+		}
 		// TODO Auto-generated method stub
 		return true;
 	}
 
 	 
 	public boolean saveToMySpace(String target_resource, String target_folder,int uid) throws Exception {
+		Resource r=rm.getResourceBySrcID(target_resource);
+		Resource r_copy=new Resource();
+		r_copy.setEdit_time(new Date());
+		r_copy.setName(r.getName());
+		r_copy.setParentid(target_folder);
+		r_copy.setSize(r.getSize());
 
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+		r_copy.setSrcID(uid+(df.format(new Date())).toString()+(int)(1+Math.random()*10));
+
+		r_copy.setSrcurl(r.getSrcurl());
+		r_copy.setState(1);
+		r_copy.setType(r.getType());
+		r_copy.setUserid(uid);
+
+		try {
+			rm.addReource(r_copy);
+
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("uid", uid);
+			map.put("change",0-Integer.parseInt(r.getSize()));
+			um.changeSpace(map);
+
+		}
+		catch(Exception e) {
+			return false;
+		}
 		return true;
 		
 	}

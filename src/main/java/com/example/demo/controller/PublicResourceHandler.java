@@ -69,32 +69,116 @@ public class PublicResourceHandler {
 	
 	@RequestMapping(value="/srcInfo")
 	public String srcInfo(HttpServletRequest request) throws Exception{
+		String srcID=request.getParameter("srcID");
+		String page=request.getParameter("page");
+		int current_page;
+		if(page!=null)
+			current_page=Integer.parseInt(page);
+		else
+			current_page=1;
+		PublicResourceVo p=ps.getPublicResourceByID(srcID);
+		p.setSize(ResourceTool.transferUnit(p.getSize()));
+		request.setAttribute("p",p);
 
-		return "";
+		List<Comment> list=ps.getCommentsBysrcID(srcID, current_page);
+		int total_comments=ps.countComments(srcID);
+		int count=(total_comments/4)*4==total_comments? (total_comments/4):(total_comments/4)+1;
+		request.setAttribute("comments",list);
+		request.setAttribute("count",count);
+
+		request.setAttribute("current_page",current_page);
+		request.setAttribute("srcID",srcID);
+		return "forward:/info.jsp?srcID="+srcID+"&page="+current_page;
 	}
 
 	@RequestMapping(value="/comment")
 	@ResponseBody
 	public String comment(String srcID,String text,HttpServletRequest request) throws Exception{
 
-			return  "{\"result\":true}";
+		int uid=(int) request.getSession().getAttribute("uid");
+		Notice n=new Notice();
 
+
+		User receiver=us.getUserBySrcID(srcID);
+		User giver=us.selectUserByID(uid);
+		n.setClassification(3);
+		n.setGiver(giver.getuName());
+		n.setReceiver(receiver.getuName());
+		n.setSrcID(srcID);
+		n.setSrcName(rs.getResourceBySrcID(srcID).getName());
+		n.setTime(new Date());
+		n.setSrcSize("--");
+		n.setNid(""+giver.getuName()+new Date()+receiver.getuName()+srcID);
+		try{
+			rs.addNotice(n);
+			ps.comment(uid, text, srcID);
+			return  "{\"result\":true}";
+		}
+		catch( Exception e) {
+			return  "{\"result\":false}";
+		}
 	}
 	
 	@RequestMapping(value="/evaluate")
 	@ResponseBody
 	public String evaluate(String srcID,String attitude,HttpServletRequest request) throws Exception{
 	
+		int uid=(int) request.getSession().getAttribute("uid");
+		Notice n=new Notice();
 
+		n.setClassification(4);
+		n.setGiver(attitude);
+		User u=us.getUserBySrcID(srcID);
+		n.setReceiver(u.getuName());
+		n.setSrcID(srcID);
+		n.setSrcName(rs.getResourceBySrcID(srcID).getName());
+		n.setTime(new Date());
+		n.setSrcSize("--");
+		n.setNid(""+n.getGiver()+new Date()+u.getuName()+srcID);
+
+		int evalution=ps.getEvaluation(srcID, uid);
+			if(evalution==-1) {
+				ps.evaluate(srcID, uid, attitude);
+				rs.addNotice(n);
 				return  "{\"result\":true}";
+			}
+			else if(evalution==-2) {
+				return  "{\"result\":\"您尚未使用过此资源\"}";
+			}
+			else
+				return  "{\"result\":false}";
 	}
 	
 	@RequestMapping(value="/download/public")
 	@ResponseBody
 	public String downloadPublic(String srcID,HttpServletRequest request) throws Exception{
 		
+		int uid=(int)request.getSession().getAttribute("uid");
 
+		Notice n=new Notice();
+
+		User receiver=us.getUserBySrcID(srcID);
+
+		User giver=us.selectUserByID(uid);
+
+		n.setClassification(2);
+		n.setReceiver(receiver.getuName());
+		n.setSrcID(srcID);
+		n.setSrcName(rs.getResourceBySrcID(srcID).getName());
+		n.setTime(new Date());
+		n.setSrcSize("--");
+		n.setNid(""+giver.getuName()+new Date()+receiver.getuName()+srcID);
+
+
+		boolean neverDownloadBefore=ps.publicDownload(srcID,receiver.getuID(),uid);	//增加积分、生成attitude、下载量加一
+
+		if(neverDownloadBefore) {
+			rs.addNotice(n);    //告知贡献者被下载啦！
 			return  "{\"result\":true}";
+		}
+		else {
+			return  "{\"result\":false}";
+		}
 
 	}
 	
@@ -102,6 +186,13 @@ public class PublicResourceHandler {
 	@ResponseBody
 	public String copy(String target_resource,String target_folder,HttpServletRequest request) throws Exception{
 
+		int uid=(int)request.getSession().getAttribute("uid");
+		try{
+			ps.saveToMySpace(target_resource,target_folder,uid);
+		}
+		catch( Exception e) {
+			return  "{\"result\":false}";
+		}
 		return  "{\"result\":true}";
 	}
 }

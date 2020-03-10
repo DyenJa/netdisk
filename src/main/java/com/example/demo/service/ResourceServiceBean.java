@@ -34,11 +34,9 @@ public class ResourceServiceBean {
 				um.changeSpace(map);
 				
 			}
-			System.out.println(rm.addReource(rs));
-
+			rm.addReource(rs);
 		}
 		catch (Exception e){
-			e.printStackTrace();
 			return false;
 		}
 		return true;	
@@ -139,7 +137,41 @@ public class ResourceServiceBean {
 	 
 	public boolean realDelete(List<String> resources) throws Exception {
 		// TODO Auto-generated method stub
+		int uid=rm.getResourceBySrcID(resources.get(0)).getUserid();
+		try {
+			List<String> resource_list=new ArrayList<>();
+			resource_list.addAll(resources);
+			 for(String s:resources) {
+				 Resource r=rm.getResourceBySrcID(s);
+				 if(r.getSize().equals("--")) {																		//这是文件夹
+					 resource_list.addAll(rm.getDeletedResourceIDList(r.getSrcID()));
+					 List<String> deleted_son_folders=rm.getForcedDirectory(s);
+					 while(deleted_son_folders.size()!=0) {
+						 String head_folder_id=deleted_son_folders.get(0);
+						 resource_list.addAll(rm.getDeletedResourceIDList(head_folder_id));
+						 deleted_son_folders.addAll(rm.getForcedDirectory(head_folder_id));
+						 deleted_son_folders.remove(0);
+					 }
+				 }
+			 }
+			 rm.realDelete(resource_list);
 
+			 //释放云盘空间
+			 int space=0;
+			 for(String s:resource_list) {
+				 Resource r=rm.getResourceBySrcID(s);
+				 if(!"--".equals(r.getSize()))
+					 space+=Integer.parseInt(r.getSize());
+			 }
+			 Map<String,Object> map = new HashMap<String,Object>();
+			 map.put("uid", uid);
+			 map.put("change",space);
+
+			 um.changeSpace(map);
+		}
+		catch (Exception e) {
+			return false;
+		}
 		return true;
 	}
 

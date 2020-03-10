@@ -90,13 +90,7 @@ public interface ResourceMapper {
 	
 	public List<Notice> loadThreeNotice(String username) throws Exception;
 
-
-
-
 	public int getUnreadNotice(String receiver)  throws Exception;
-
-
-
 
 	public boolean deleteNotice(String nid) throws Exception;
 

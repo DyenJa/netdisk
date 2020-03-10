@@ -137,16 +137,42 @@ public class UserHandler {
 	  @RequestMapping(value = "/uploadhead.do", method = RequestMethod.POST)
 		public String upload(HttpServletRequest request,@RequestParam("file") MultipartFile[] file, ModelMap model) throws IOException {
 
-			return "path";
+			int uid=(int) request.getSession().getAttribute("uid");
+	//		String parentid=request.getParameter("current_position")==null? "none":request.getParameter("current_position");
+
+//		  	String currentPath="C://Users//18379//Desktop//mysqldemo//src//main";
+//		  	String path = currentPath+"//webapp//upload//"+uid;//获取当前项目下的upload,社会主义改造期间改为..//upload//username//
+		  String path ="/root/webapp/upload/"+uid;
+
+
+				SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+				String fileName = df.format(new Date())+file[0].getOriginalFilename();//获取文件名
+
+				File targetFile = new File(path, fileName);//判断文件是否存在，不存在则创建，可创建文件夹
+				System.out.println(path);
+		 		 if (!targetFile.exists()) {
+					targetFile.createNewFile();
+				}
+				try {
+					file[0].transferTo(targetFile);//此方法在上传完成后才开始上传
+
+
+					us.changeheadpic("/upload/"+uid+"/"+fileName,uid);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			return path+fileName;
 		}
 	  
 	   @RequestMapping(value="/refreshHead",produces = "text/html;charset=UTF-8")
 		@ResponseBody
 		public String refreshHead(HttpServletRequest request) throws Exception{
 		
-
+			int uid=(int) request.getSession().getAttribute("uid");
+			User u=us.selectUserByID(uid);
 		
-			return "{\"result\":\""+"path"+"\"}";
+			return "{\"result\":\""+u.getPicurl()+"\"}";
 		}
 	   
 	   @RequestMapping(value="/refreshSpace",produces = "text/html;charset=UTF-8")

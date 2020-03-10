@@ -155,7 +155,6 @@ public class ResourceHandler {
 		}
 		r.setUserid(uid);
 		rs.addReource(r);
-		System.out.println("ok");
 		//创建文件夹（即只需要插入一条记录，并不需要本地创建）
 		//文件类型设置为folder
 		return "forward:/loadSourceList?current_position="+parentid;
@@ -362,7 +361,8 @@ public class ResourceHandler {
 	  @RequestMapping("/realDelete")  
       public String realDelete(HttpServletRequest request,HttpServletResponse response) throws Exception{    
 		
-
+		  String srcID=request.getParameter("srcID");
+		  rs.realDelete(Arrays.asList(srcID));
 		  
 		  return "forward:/loadTrash";
       } 
@@ -371,6 +371,7 @@ public class ResourceHandler {
 		@ResponseBody
 		public String batchRealDelete(String[] resources,HttpServletRequest request) throws Exception{
 
+			 rs.realDelete(Arrays.asList(resources));
 			 return  "{\"result\":true}";
 		}
 	  

@@ -66,7 +66,8 @@ public class UserServiceBean  {
 	public boolean changeheadpic(String url,int uid) throws Exception {
 		// TODO Auto-generated method stub
 		Map<String,Object> map = new HashMap<String,Object>();
-
+		map.put("uid", uid);
+		map.put("url",url);
 		return um.changeheadpic(map);
 	}
 

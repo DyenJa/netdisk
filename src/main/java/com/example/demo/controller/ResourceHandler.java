@@ -176,7 +176,10 @@ public class ResourceHandler {
 			File targetFile = new File(path, fileName);//判断文件是否存在，不存在则创建，可创建文件夹
 
 			if (!targetFile.exists()) {
-				targetFile.createNewFile();
+				boolean r=targetFile.createNewFile();
+				if(!r){
+					throw new Exception("创建失败");
+				}
 			}
 		
 			// 保存

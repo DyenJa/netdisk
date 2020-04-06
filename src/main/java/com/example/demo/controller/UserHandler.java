@@ -135,7 +135,7 @@ public class UserHandler {
       } 
 	  
 	  @RequestMapping(value = "/uploadhead.do", method = RequestMethod.POST)
-		public String upload(HttpServletRequest request,@RequestParam("file") MultipartFile[] file, ModelMap model) throws IOException {
+		public String upload(HttpServletRequest request,@RequestParam("file") MultipartFile[] file, ModelMap model) throws Exception {
 
 			int uid=(int) request.getSession().getAttribute("uid");
 	//		String parentid=request.getParameter("current_position")==null? "none":request.getParameter("current_position");
@@ -151,7 +151,11 @@ public class UserHandler {
 				File targetFile = new File(path, fileName);//判断文件是否存在，不存在则创建，可创建文件夹
 				System.out.println(path);
 		 		 if (!targetFile.exists()) {
-					targetFile.createNewFile();
+
+					 boolean r=	targetFile.createNewFile();
+					 if(!r){
+						 throw new Exception("创建失败");
+					 }
 				}
 				try {
 					file[0].transferTo(targetFile);//此方法在上传完成后才开始上传

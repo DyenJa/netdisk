@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import tools.LogConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -163,7 +164,8 @@ public class UserHandler {
 
 					us.changeheadpic("/upload/"+uid+"/"+fileName,uid);
 				} catch (Exception e) {
-					e.printStackTrace();
+		
+					LogConfig.getLOG().error("错误信息", e);
 				}
 
 			return path+fileName;

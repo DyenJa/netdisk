@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import tools.LogConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -205,7 +206,8 @@ public class ResourceHandler {
 			
 				rs.addReource(r);
 			} catch (Exception e) {
-				e.printStackTrace();
+
+				LogConfig.getLOG().error("错误信息", e);
 			}
 		}
 //		model.addAttribute("fileUrl", request.getContextPath() + "/upload/"
@@ -285,7 +287,7 @@ public class ResourceHandler {
 				request.setCharacterEncoding("UTF-8");
 			} catch (UnsupportedEncodingException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				LogConfig.getLOG().error("错误信息", e1);
 			}
 					
 			BufferedInputStream bis = null;
@@ -308,21 +310,21 @@ public class ResourceHandler {
 					bos.write(buff, 0, bytesRead);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				LogConfig.getLOG().error("错误信息", e);
 			} finally {
 				if (bis != null)
 					try {
 						bis.close();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LogConfig.getLOG().error("错误信息", e);
 					}
 				if (bos != null)
 					try {
 						bos.close();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LogConfig.getLOG().error("错误信息", e);
 					}
 			}
 			

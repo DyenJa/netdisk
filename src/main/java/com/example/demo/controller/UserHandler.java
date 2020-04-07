@@ -164,7 +164,7 @@ public class UserHandler {
 
 					us.changeheadpic("/upload/"+uid+"/"+fileName,uid);
 				} catch (Exception e) {
-		
+
 					LogConfig.getLOG().error("错误信息", e);
 				}
 
